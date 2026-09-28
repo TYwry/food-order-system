@@ -263,36 +263,60 @@ body{
   font-size:12px;
   padding:20px 0;
 }
-.receipt-line{
+.rl-row{
   display:flex;
-  align-items:baseline;
+  align-items:center;
   gap:6px;
   font-size:12.5px;
-  padding:5px 0;
+  padding:4px 0;
   flex-wrap:wrap;
 }
-.rl-name{white-space:nowrap;}
-.rl-size{
-  display:inline-flex;
-  border:1px solid var(--gold);
-  border-radius:6px;
-  overflow:hidden;
-  flex-shrink:0;
-  align-self:center;
+.rl-group{
+  padding:6px 0 4px;
+  border-top:1px dotted var(--line);
 }
-.rl-size button{
-  border:none;
-  background:#fff;
-  color:var(--gold);
-  font-family:'Noto Sans TC',sans-serif;
-  font-size:12px;
-  padding:4px 10px;
-  cursor:pointer;
-}
-.rl-size button.active{
-  background:var(--gold);
-  color:#fff;
+.rl-group:first-child{border-top:none;}
+.rl-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:13px;
   font-weight:700;
+}
+.rl-group .rl-row{padding-left:12px;}
+.rl-row.zero{opacity:.45;}
+.rl-name{white-space:nowrap;}
+.rl-size-label{
+  min-width:24px;
+  font-weight:700;
+  color:var(--gold);
+}
+.rl-stepper{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  flex-shrink:0;
+}
+.rl-step{
+  width:30px;height:30px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  font-family:inherit;
+  font-size:16px;
+  line-height:1;
+  padding:0;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.rl-step:active{transform:scale(0.92);}
+.rl-step:disabled{opacity:.35;cursor:default;}
+.rl-qty{
+  min-width:18px;
+  text-align:center;
+  font-weight:700;
+  color:var(--green);
 }
 .rl-unit{
   white-space:nowrap;
@@ -300,7 +324,7 @@ body{
   font-size:11px;
 }
 .rl-fill{
-  flex:1;
+  flex:1 1 8px;
   border-bottom:1px dotted var(--line);
   margin-bottom:3px;
 }
@@ -486,7 +510,7 @@ body{
     </div>
     <button class="qa-btn" id="qa-add">加入清單</button>
     <div class="qa-error" id="qa-error"></div>
-    <div class="qa-hint">單一編號可選規格；多筆編號用 - , 或空白分隔（例如 7-8-9-10），有大小份的品項預設加入「大份」，加入後可在上方訂單明細切換大／小份。也可以直接點下方菜單卡片上的號碼加入</div>
+    <div class="qa-hint">單一編號可選規格；多筆編號用 - , 或空白分隔（例如 7-8-9-10），有大小份的品項預設加入「大份」，加入後可在訂單明細裡分別調整大份、小份的數量。也可以直接點下方菜單卡片上的號碼加入</div>
   </div>
 
   <div class="layout">
@@ -603,14 +627,10 @@ function defaultSize(it){
   return keys.indexOf('大') >= 0 ? '大' : keys[0];
 }
 
-function changeSize(id, from, to){
-  if (from === to) return;
-  const fk = keyFor(id, from);
-  const tk = keyFor(id, to);
-  const q = order[fk] || 0;
-  if (q <= 0) return;
-  order[tk] = (order[tk] || 0) + q;
-  delete order[fk];
+function removeItem(id){
+  Object.keys(order).forEach(k => {
+    if (k === String(id) || k.indexOf(id + '|') === 0) delete order[k];
+  });
   renderMenu();
   renderReceipt();
 }
@@ -736,24 +756,42 @@ function renderReceipt(){
   MENU.forEach(group => {
     group.items.forEach(it => {
       if (it.sizes){
-        Object.entries(it.sizes).forEach(([s,p]) => {
-          const q = getQty(it.id, s);
-          if (q > 0){
-            hasLines = true;
-            const sub = p * q;
-            grandTotal += sub;
-            totalCount += q;
-            body.appendChild(makeLine(it.name, q, p, sub, it.id, s, it));
-          }
+        const sizeKeys = Object.keys(it.sizes);
+        const itemQty = sizeKeys.reduce((n, sz) => n + getQty(it.id, sz), 0);
+        if (itemQty <= 0) return;
+        hasLines = true;
+
+        const box = document.createElement('div');
+        box.className = 'rl-group';
+
+        const head = document.createElement('div');
+        head.className = 'rl-group-head';
+        const headName = document.createElement('span');
+        headName.textContent = it.name;
+        const headRemove = document.createElement('button');
+        headRemove.className = 'rl-remove';
+        headRemove.textContent = '✕';
+        headRemove.setAttribute('aria-label', '移除 ' + it.name + ' 全部');
+        headRemove.addEventListener('click', () => removeItem(it.id));
+        head.appendChild(headName);
+        head.appendChild(headRemove);
+        box.appendChild(head);
+
+        sizeKeys.forEach(sz => {
+          const q = getQty(it.id, sz);
+          const p = it.sizes[sz];
+          grandTotal += p * q;
+          totalCount += q;
+          box.appendChild(makeRow(it.name, sz, it.id, q, p));
         });
+        body.appendChild(box);
       } else {
         const q = getQty(it.id, null);
         if (q > 0){
           hasLines = true;
-          const sub = it.price * q;
-          grandTotal += sub;
+          grandTotal += it.price * q;
           totalCount += q;
-          body.appendChild(makeLine(it.name, q, it.price, sub, it.id, null));
+          body.appendChild(makeRow(it.name, null, it.id, q, it.price));
         }
       }
     });
@@ -781,12 +819,42 @@ function renderReceipt(){
   body.appendChild(totalRow);
 }
 
-function makeLine(label, qty, unitPrice, sub, id, size, item){
-  const line = document.createElement('div');
-  line.className = 'receipt-line';
-  const nameSpan = document.createElement('span');
-  nameSpan.className = 'rl-name';
-  nameSpan.textContent = label + ' ×' + qty;
+function makeStepBtn(text, ariaLabel, onClick){
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'rl-step';
+  b.textContent = text;
+  b.setAttribute('aria-label', ariaLabel);
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function makeRow(name, size, id, qty, unitPrice){
+  const row = document.createElement('div');
+  row.className = 'rl-row' + (qty === 0 ? ' zero' : '');
+  const fullLabel = name + (size ? '(' + size + ')' : '');
+
+  const label = document.createElement('span');
+  if (size){
+    label.className = 'rl-size-label';
+    label.textContent = size;
+  } else {
+    label.className = 'rl-name';
+    label.textContent = name;
+  }
+
+  const stepper = document.createElement('span');
+  stepper.className = 'rl-stepper';
+  const minus = makeStepBtn('−', fullLabel + ' 減少一份', () => addToOrder(id, size, -1));
+  minus.disabled = qty <= 0;
+  const qtyEl = document.createElement('span');
+  qtyEl.className = 'rl-qty';
+  qtyEl.textContent = qty;
+  const plus = makeStepBtn('+', fullLabel + ' 增加一份', () => addToOrder(id, size, 1));
+  stepper.appendChild(minus);
+  stepper.appendChild(qtyEl);
+  stepper.appendChild(plus);
+
   const unitSpan = document.createElement('span');
   unitSpan.className = 'rl-unit';
   unitSpan.textContent = '@$' + unitPrice;
@@ -794,32 +862,23 @@ function makeLine(label, qty, unitPrice, sub, id, size, item){
   fill.className = 'rl-fill';
   const amt = document.createElement('span');
   amt.className = 'rl-amt';
-  amt.textContent = '$' + sub;
-  const removeBtn = document.createElement('button');
-  removeBtn.className = 'rl-remove';
-  removeBtn.textContent = '✕';
-  removeBtn.setAttribute('aria-label', '移除 ' + label + (size ? '(' + size + ')' : ''));
-  removeBtn.addEventListener('click', () => setQty(id, size, 0));
-  line.appendChild(nameSpan);
-  if (item && item.sizes){
-    const toggle = document.createElement('span');
-    toggle.className = 'rl-size';
-    Object.keys(item.sizes).forEach(sz => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = sz;
-      if (sz === size) b.className = 'active';
-      b.setAttribute('aria-label', label + ' 改為' + sz);
-      b.addEventListener('click', () => changeSize(id, size, sz));
-      toggle.appendChild(b);
-    });
-    line.appendChild(toggle);
+  amt.textContent = '$' + (unitPrice * qty);
+
+  row.appendChild(label);
+  row.appendChild(stepper);
+  row.appendChild(unitSpan);
+  row.appendChild(fill);
+  row.appendChild(amt);
+
+  if (!size){
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'rl-remove';
+    removeBtn.textContent = '✕';
+    removeBtn.setAttribute('aria-label', '移除 ' + name);
+    removeBtn.addEventListener('click', () => setQty(id, null, 0));
+    row.appendChild(removeBtn);
   }
-  line.appendChild(unitSpan);
-  line.appendChild(fill);
-  line.appendChild(amt);
-  line.appendChild(removeBtn);
-  return line;
+  return row;
 }
 
 const qaNum = document.getElementById('qa-num');
