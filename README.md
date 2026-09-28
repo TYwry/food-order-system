@@ -2,7 +2,7 @@
 
 一個放在瀏覽器裡就能用的小工具：輸入菜單上的品項編號，就自動列出訂單明細、每項金額、總份數和總金額。適合團體訂餐、統計便當份數的人使用。
 
-## 🌐 [直接開啟網頁版（iPhone、Android、電腦都適用）](https://TYwry.github.io/food-order-system/)
+## 🌐 [直接開啟網頁版（iPhone、Android、電腦都適用）](https://__GH_USER__.github.io/food-order-system/)
 
 點開連結就會在瀏覽器裡使用，不用下載、不用安裝、不用登入。
 
@@ -41,6 +41,7 @@
 | --- | --- |
 | `index.html` | 程式本體，網頁版與下載檔案版都是這個檔案。 |
 | `README.md` | 這份說明。 |
+| `apple-touch-icon.png`、`icon-192.png` | 加入 iPhone 主畫面時顯示的 App 圖示，以及瀏覽器分頁圖示。 |
 | `setup-github.bat`、`save.bat`、`publish-release.bat`、`publish-web.bat` | 給維護者上傳與發布用的工具，一般使用者不用理會。 |
 | `.gitignore`、`.gitattributes` | 版本管理用的設定，不用理會。 |
 
