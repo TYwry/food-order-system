@@ -43,17 +43,19 @@ if not exist ".git" (
   git init -b main
 )
 
+for /f "delims=" %%i in ('gh api user --jq .login') do set GHUSER=%%i
+for /f "delims=" %%i in ('gh api user --jq .id') do set GHID=%%i
+if not defined GHUSER (
+  echo 無法取得 GitHub 帳號名稱，請重新執行。
+  pause
+  exit /b 1
+)
 git config user.name >nul 2>nul
-if errorlevel 1 (
-  for /f "delims=" %%i in ('gh api user --jq .login') do set GHUSER=%%i
-  git config user.name "!GHUSER!"
-)
+if errorlevel 1 git config user.name "!GHUSER!"
 git config user.email >nul 2>nul
-if errorlevel 1 (
-  for /f "delims=" %%i in ('gh api user --jq .login') do set GHUSER=%%i
-  for /f "delims=" %%i in ('gh api user --jq .id') do set GHID=%%i
-  git config user.email "!GHID!+!GHUSER!@users.noreply.github.com"
-)
+if errorlevel 1 git config user.email "!GHID!+!GHUSER!@users.noreply.github.com"
+
+powershell -NoProfile -Command "$p='README.md'; $t=[IO.File]::ReadAllText($p); $t=$t.Replace('__GH_USER__','!GHUSER!'); [IO.File]::WriteAllText($p,$t,(New-Object Text.UTF8Encoding($false)))"
 
 git add -A
 git diff --cached --name-only | findstr /i /r "config\.json history\.json \.env \.log \.key \.pem \.pfx secret password credential apikey api_key" >nul
@@ -89,4 +91,5 @@ if errorlevel 1 (
 
 echo.
 echo 完成！之後修改檔案，只要雙擊 save.bat 就能存檔上傳。
+echo 想在 iPhone 用 Safari 直接開啟網頁版，請再雙擊 publish-web.bat。
 pause
