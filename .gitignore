@@ -1,0 +1,30 @@
+# 金鑰與密碼
+config.json
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.p12
+*secret*
+*password*
+*credential*
+*apikey*
+*api_key*
+
+# 個人資料 / 使用紀錄
+history.json
+*.log
+
+# 自動產生的檔案
+*.tmp
+dist/
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+
+# 暫存
+.commit-message.txt
+*.bundle
