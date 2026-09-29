@@ -769,7 +769,7 @@ function renderReceipt(){
         const head = document.createElement('div');
         head.className = 'rl-group-head';
         const headName = document.createElement('span');
-        headName.textContent = it.name;
+        headName.textContent = it.id + '. ' + it.name;
         const headRemove = document.createElement('button');
         headRemove.className = 'rl-remove';
         headRemove.textContent = '✕';
@@ -793,7 +793,7 @@ function renderReceipt(){
           hasLines = true;
           grandTotal += it.price * q;
           totalCount += q;
-          body.appendChild(makeRow(it.name, null, it.id, q, it.price));
+          body.appendChild(makeRow(it.id + '. ' + it.name, null, it.id, q, it.price));
         }
       }
     });
