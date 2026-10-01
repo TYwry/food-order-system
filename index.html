@@ -95,7 +95,7 @@ body{
 .layout{
   display:grid;
   grid-template-columns:1fr 320px;
-  grid-template-areas:"menu receipt" "menu import" "menu report";
+  grid-template-areas:"menu receipt" "menu report" "menu import";
   grid-template-rows:auto auto auto;
   gap:20px;
   align-items:start;
@@ -107,7 +107,7 @@ body{
 @media (max-width:760px){
   .layout{
     grid-template-columns:1fr;
-    grid-template-areas:"receipt" "import" "report" "menu";
+    grid-template-areas:"receipt" "report" "import" "menu";
     grid-template-rows:auto;
   }
 }
@@ -135,7 +135,7 @@ body{
 }
 .field input,.field select{
   font-family:'JetBrains Mono',monospace;
-  font-size:15px;
+  font-size:16px;
   padding:8px 10px;
   border:1px solid var(--line);
   border-radius:6px;
@@ -441,6 +441,13 @@ body{
   border-radius:8px;
   padding:14px;
 }
+.daily-report-title{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:3px;
+  color:var(--ink-soft);
+  margin-bottom:10px;
+}
 .daily-report-row{
   display:flex;
   align-items:center;
@@ -483,11 +490,38 @@ body{
 .menu-search-wrap{
   margin-bottom:14px;
 }
+.menu-collapse{
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+.menu-collapse summary{
+  cursor:pointer;
+  padding:12px 14px;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:3px;
+  color:var(--ink-soft);
+  list-style:none;
+  position:relative;
+}
+.menu-collapse summary::-webkit-details-marker{display:none;}
+.menu-collapse summary::after{
+  content:'▾';
+  position:absolute;
+  right:14px;
+  top:12px;
+  transition:transform .15s;
+}
+.menu-collapse[open] summary::after{transform:rotate(180deg);}
+.menu-collapse #menu-area{
+  padding:0 14px 14px;
+}
 #menu-search{
   width:100%;
   box-sizing:border-box;
   font-family:'Noto Sans TC',sans-serif;
-  font-size:15px;
+  font-size:16px;
   padding:10px 12px;
   border:1px solid var(--line);
   border-radius:8px;
@@ -511,7 +545,7 @@ body{
 }
 .date-select-group select{
   font-family:'JetBrains Mono',monospace;
-  font-size:14px;
+  font-size:16px;
   padding:7px 6px;
   border:1px solid var(--line);
   border-radius:6px;
@@ -579,7 +613,7 @@ body{
   box-sizing:border-box;
   min-height:110px;
   font-family:'JetBrains Mono',monospace;
-  font-size:12px;
+  font-size:16px;
   padding:8px;
   border:1px solid var(--line);
   border-radius:6px;
@@ -807,7 +841,10 @@ body{
       <div class="menu-search-wrap">
         <input type="text" id="menu-search" placeholder="🔍 搜尋菜色名稱…">
       </div>
-      <div id="menu-area"></div>
+      <details class="menu-collapse" id="menu-collapse">
+        <summary>手 動 選 擇 品 項</summary>
+        <div id="menu-area"></div>
+      </details>
     </div>
     <div class="receipt">
       <div class="receipt-title">訂 單 明 細</div>
@@ -836,8 +873,21 @@ body{
       <div class="copy-toast" id="copy-toast"></div>
       <div id="copy-fallback" style="display:none; margin-top:10px;">
         <div style="font-size:11px; color:var(--ink-soft); margin-bottom:4px;">自動複製未成功，請長按下方文字框選取全部並手動複製：</div>
-        <textarea id="copy-fallback-text" readonly style="width:100%; box-sizing:border-box; min-height:110px; font-family:'JetBrains Mono',monospace; font-size:12px; padding:8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);"></textarea>
+        <textarea id="copy-fallback-text" readonly style="width:100%; box-sizing:border-box; min-height:110px; font-family:'JetBrains Mono',monospace; font-size:16px; padding:8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);"></textarea>
       </div>
+    </div>
+    <div class="daily-report">
+      <div class="daily-report-title">回 報 文 字 區 域</div>
+      <div class="daily-report-row">
+        <span class="daily-report-label">午</span>
+        <div class="daily-report-stepper">
+          <button class="step-btn" id="dr-minus" aria-label="減少">−</button>
+          <span class="daily-report-num" id="dr-num">9</span>
+          <button class="step-btn" id="dr-plus" aria-label="增加">+</button>
+        </div>
+        <button class="rbtn simple" id="dr-copy-btn">複製今日金額</button>
+      </div>
+      <div class="daily-report-preview" id="dr-preview">午9，$0</div>
     </div>
     <details class="import-section" id="import-section">
       <summary>貼 上 舊 訂 單</summary>
@@ -854,18 +904,6 @@ body{
         <div class="import-note">套用後會覆蓋目前的訂單明細，接著可用「直接加入日曆」或「更改日期並儲存」保存。</div>
       </div>
     </details>
-    <div class="daily-report">
-      <div class="daily-report-row">
-        <span class="daily-report-label">午</span>
-        <div class="daily-report-stepper">
-          <button class="step-btn" id="dr-minus" aria-label="減少">−</button>
-          <span class="daily-report-num" id="dr-num">9</span>
-          <button class="step-btn" id="dr-plus" aria-label="增加">+</button>
-        </div>
-        <button class="rbtn simple" id="dr-copy-btn">複製今日金額</button>
-      </div>
-      <div class="daily-report-preview" id="dr-preview">午9，$0</div>
-    </div>
   </div>
 </div>
 
@@ -1062,6 +1100,9 @@ function renderMenu(){
 
 document.getElementById('menu-search').addEventListener('input', (e) => {
   menuSearchTerm = e.target.value;
+  if (menuSearchTerm.trim()){
+    document.getElementById('menu-collapse').open = true;
+  }
   renderMenu();
 });
 
