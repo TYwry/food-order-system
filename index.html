@@ -95,18 +95,19 @@ body{
 .layout{
   display:grid;
   grid-template-columns:1fr 320px;
-  grid-template-areas:"menu receipt" "menu import";
-  grid-template-rows:auto auto;
+  grid-template-areas:"menu receipt" "menu import" "menu report";
+  grid-template-rows:auto auto auto;
   gap:20px;
   align-items:start;
 }
 .menu-column{grid-area:menu;min-width:0;}
 .receipt{grid-area:receipt;min-width:0;}
 .layout .import-section{grid-area:import;min-width:0;}
+.layout .daily-report{grid-area:report;min-width:0;}
 @media (max-width:760px){
   .layout{
     grid-template-columns:1fr;
-    grid-template-areas:"receipt" "import" "menu";
+    grid-template-areas:"receipt" "import" "report" "menu";
     grid-template-rows:auto;
   }
 }
@@ -427,6 +428,54 @@ body{
   border-color:var(--plum);
   color:var(--plum);
   font-weight:500;
+}
+.rbtn.ghost{
+  background:#fff;
+  border-color:var(--line);
+  color:var(--ink-soft);
+}
+.daily-report{
+  margin-top:22px;
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px;
+}
+.daily-report-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.daily-report-label{
+  font-size:15px;
+  font-weight:700;
+  color:var(--stamp);
+  font-family:'JetBrains Mono',monospace;
+}
+.daily-report-stepper{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.daily-report-num{
+  min-width:18px;
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700;
+  color:var(--green);
+  font-size:15px;
+}
+.daily-report-preview{
+  margin-top:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;
+  color:var(--ink);
+  background:#fff;
+  border:1px dashed var(--line);
+  border-radius:6px;
+  padding:8px 10px;
+  text-align:center;
 }
 .menu-column{
   min-width:0;
@@ -799,11 +848,24 @@ body{
         </div>
         <div class="receipt-actions">
           <button class="rbtn simple" id="import-apply-btn">解析並加入明細</button>
+          <button class="rbtn ghost" id="import-clear-btn">清空輸入文字</button>
         </div>
         <div class="import-feedback" id="import-feedback"></div>
-        <div class="import-note">套用後會覆蓋目前的訂單明細，接著可用「直接加入日曆」或「更改日期並存」保存。</div>
+        <div class="import-note">套用後會覆蓋目前的訂單明細，接著可用「直接加入日曆」或「更改日期並儲存」保存。</div>
       </div>
     </details>
+    <div class="daily-report">
+      <div class="daily-report-row">
+        <span class="daily-report-label">午</span>
+        <div class="daily-report-stepper">
+          <button class="step-btn" id="dr-minus" aria-label="減少">−</button>
+          <span class="daily-report-num" id="dr-num">9</span>
+          <button class="step-btn" id="dr-plus" aria-label="增加">+</button>
+        </div>
+        <button class="rbtn simple" id="dr-copy-btn">複製今日金額</button>
+      </div>
+      <div class="daily-report-preview" id="dr-preview">午9，$0</div>
+    </div>
   </div>
 </div>
 
@@ -1479,6 +1541,7 @@ document.getElementById('custom-date-confirm-btn').addEventListener('click', asy
   renderMenu();
   renderReceipt();
   refreshCalendarIfOpen();
+  updateDailyReportPreview();
   customDateRow.style.display = 'none';
 
   toast.style.color = 'var(--green)';
@@ -1548,6 +1611,11 @@ document.getElementById('import-apply-btn').addEventListener('click', () => {
   }
 });
 
+document.getElementById('import-clear-btn').addEventListener('click', () => {
+  document.getElementById('import-text').value = '';
+  document.getElementById('import-feedback').textContent = '';
+});
+
 document.getElementById('archive-btn').addEventListener('click', async () => {
   const summary = collectOrderSummary();
   const toast = document.getElementById('copy-toast');
@@ -1564,6 +1632,7 @@ document.getElementById('archive-btn').addEventListener('click', async () => {
   renderMenu();
   renderReceipt();
   refreshCalendarIfOpen();
+  updateDailyReportPreview();
 
   toast.style.color = 'var(--green)';
   toast.textContent = '已加入日曆，清單已清空準備下一筆';
@@ -1712,8 +1781,49 @@ document.getElementById('cal-next').addEventListener('click', () => {
   renderCalendar();
 });
 
+let dailyReportNum = 9;
+
+async function getTodayTotal(){
+  const list = await loadHistory();
+  const todayKey = dateKeyFromTs(Date.now());
+  return list.filter(e => dateKeyFromTs(e.ts) === todayKey).reduce((n, e) => n + e.grandTotal, 0);
+}
+
+async function updateDailyReportPreview(){
+  const total = await getTodayTotal();
+  document.getElementById('dr-preview').textContent = '午' + dailyReportNum + '，' + total;
+}
+
+document.getElementById('dr-minus').addEventListener('click', () => {
+  if (dailyReportNum > 1) dailyReportNum--;
+  document.getElementById('dr-num').textContent = dailyReportNum;
+  updateDailyReportPreview();
+});
+
+document.getElementById('dr-plus').addEventListener('click', () => {
+  if (dailyReportNum < 9) dailyReportNum++;
+  document.getElementById('dr-num').textContent = dailyReportNum;
+  updateDailyReportPreview();
+});
+
+document.getElementById('dr-copy-btn').addEventListener('click', async () => {
+  const total = await getTodayTotal();
+  const text = '午' + dailyReportNum + '，' + total;
+  const toast = document.getElementById('copy-toast');
+  const ok = await copyTextRobust(text);
+  if (ok){
+    toast.style.color = 'var(--green)';
+    toast.textContent = '已複製「' + text + '」';
+    setTimeout(() => { toast.textContent = ''; }, 2500);
+  } else {
+    toast.style.color = 'var(--stamp)';
+    toast.textContent = '自動複製失敗，請長按下方文字框選取後複製';
+  }
+});
+
 renderMenu();
 renderReceipt();
+updateDailyReportPreview();
 </script>
 </body>
 </html>
