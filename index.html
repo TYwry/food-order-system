@@ -26,6 +26,10 @@
   --green:#3f5f3a;
   --slate:#39586e;
   --slate-soft:#dde6ea;
+  --warn:#9a4b32;
+  --warn-soft:#f1e0d6;
+  --plum:#6b4870;
+  --plum-soft:#ebdcee;
 }
 *{box-sizing:border-box;}
 body{
@@ -46,6 +50,25 @@ body{
   gap:16px;
   margin-bottom:22px;
 }
+.masthead-info{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  flex:1;
+  min-width:0;
+}
+.calendar-btn{
+  flex-shrink:0;
+  width:44px;height:44px;
+  border-radius:50%;
+  border:1.5px solid var(--line);
+  background:var(--paper-2);
+  color:var(--ink);
+  font-size:19px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.calendar-btn:active{transform:scale(0.95);}
 .stamp-circle{
   width:56px;height:56px;border-radius:50%;
   border:2.5px solid var(--stamp);
@@ -72,18 +95,18 @@ body{
 .layout{
   display:grid;
   grid-template-columns:1fr 320px;
-  grid-template-areas:"menu receipt" "menu history";
-  grid-template-rows:auto 1fr;
+  grid-template-areas:"menu receipt" "menu import";
+  grid-template-rows:auto auto;
   gap:20px;
   align-items:start;
 }
-#menu-area{grid-area:menu;min-width:0;}
+.menu-column{grid-area:menu;min-width:0;}
 .receipt{grid-area:receipt;min-width:0;}
-.layout .history-section{grid-area:history;margin-top:0;min-width:0;}
+.layout .import-section{grid-area:import;min-width:0;}
 @media (max-width:760px){
   .layout{
     grid-template-columns:1fr;
-    grid-template-areas:"receipt" "history" "menu";
+    grid-template-areas:"receipt" "import" "menu";
     grid-template-rows:auto;
   }
 }
@@ -393,92 +416,285 @@ body{
   color:var(--slate);
   font-weight:500;
 }
-.history-section{
-  margin-top:22px;
+.rbtn.warn{
+  background:var(--warn-soft);
+  border-color:var(--warn);
+  color:var(--warn);
+  font-weight:500;
 }
-.history-header{
+.rbtn.custom-date{
+  background:var(--plum-soft);
+  border-color:var(--plum);
+  color:var(--plum);
+  font-weight:500;
+}
+.menu-column{
+  min-width:0;
+}
+.menu-search-wrap{
+  margin-bottom:14px;
+}
+#menu-search{
+  width:100%;
+  box-sizing:border-box;
+  font-family:'Noto Sans TC',sans-serif;
+  font-size:15px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--paper-2);
+  color:var(--ink);
+}
+#menu-search:focus{
+  outline:none;
+  border-color:var(--gold);
+  background:#fff;
+}
+.menu-empty{
+  font-size:13px;
+  color:var(--ink-soft);
+  text-align:center;
+  padding:24px 0;
+}
+.date-select-group{
   display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  border-bottom:1px solid var(--line);
-  padding-bottom:6px;
+  gap:6px;
+}
+.date-select-group select{
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;
+  padding:7px 6px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+  color:var(--ink);
+  flex:1;
+  min-width:0;
+}
+#custom-date-row{
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:12px 14px 14px;
   margin-bottom:10px;
 }
-.history-header h2{
+.import-section{
+  margin-top:22px;
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+.import-section summary{
+  cursor:pointer;
+  padding:12px 14px;
   font-size:14px;
   font-weight:700;
   letter-spacing:3px;
   color:var(--ink-soft);
-  margin:0;
+  list-style:none;
+  position:relative;
 }
-.history-clear{
-  border:none;
-  background:none;
+.import-section summary::-webkit-details-marker{display:none;}
+.import-section summary::after{
+  content:'▾';
+  position:absolute;
+  right:14px;
+  top:12px;
+  transition:transform .15s;
+}
+.import-section[open] summary::after{transform:rotate(180deg);}
+.import-body{
+  padding:0 14px 14px;
+}
+.import-field{
+  margin-bottom:10px;
+}
+.import-field label{
+  display:block;
+  font-size:11px;
   color:var(--ink-soft);
-  font-size:12px;
-  cursor:pointer;
-  text-decoration:underline;
+  letter-spacing:0.5px;
+  margin-bottom:4px;
 }
-.history-empty{
-  font-size:12px;
-  color:var(--ink-soft);
-  padding:8px 0;
-}
-.history-entry{
-  background:var(--paper-2);
+.import-field input[type="date"]{
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;
+  padding:7px 9px;
   border:1px solid var(--line);
-  border-radius:8px;
-  margin-bottom:8px;
-  overflow:hidden;
+  border-radius:6px;
+  background:#fff;
+  color:var(--ink);
 }
-.history-summary{
+#import-text{
+  width:100%;
+  box-sizing:border-box;
+  min-height:110px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+  color:var(--ink);
+  resize:vertical;
+}
+.import-note{
+  font-size:11px;
+  color:var(--ink-soft);
+  margin-top:6px;
+}
+.import-feedback{
+  font-size:12px;
+  margin-top:6px;
+  min-height:14px;
+}
+.calendar-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(34,30,25,0.55);
+  display:none;
+  align-items:flex-start;
+  justify-content:center;
+  padding:24px 14px;
+  overflow-y:auto;
+  z-index:100;
+}
+.calendar-overlay.open{display:flex;}
+.calendar-modal{
+  background:var(--paper-2);
+  border-radius:12px;
+  width:100%;
+  max-width:420px;
+  padding:16px;
+  box-sizing:border-box;
+}
+.calendar-header{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 14px;
-  cursor:pointer;
+  gap:8px;
+  margin-bottom:8px;
 }
-.history-meta{
-  font-size:12.5px;
-  color:var(--ink-soft);
-}
-.history-meta .date{
+.cal-nav{
+  width:30px;height:30px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:#fff;
   color:var(--ink);
-  font-weight:500;
-  margin-right:8px;
+  font-size:16px;
+  cursor:pointer;
+  flex-shrink:0;
 }
-.history-total{
+.calendar-title{
+  flex:1;
+  text-align:center;
   font-family:'JetBrains Mono',monospace;
   font-weight:700;
-  color:var(--stamp);
-  font-size:14px;
-  white-space:nowrap;
+  font-size:15px;
 }
-.history-detail{
-  display:none;
-  padding:0 14px 12px;
+.cal-close{
+  width:30px;height:30px;
+  border-radius:50%;
+  border:none;
+  background:none;
+  color:var(--ink-soft);
+  font-size:16px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.calendar-month-total{
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  color:var(--ink-soft);
+  margin-bottom:12px;
+}
+.calendar-month-total b{
+  color:var(--stamp);
+  font-size:16px;
+}
+.calendar-weekdays, .calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+}
+.calendar-weekdays{
+  margin-bottom:4px;
+}
+.calendar-weekdays div{
+  text-align:center;
+  font-size:11px;
+  color:var(--ink-soft);
+}
+.cal-day{
+  aspect-ratio:1/1;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  padding:2px;
+}
+.cal-day.empty{
+  border:none;
+  background:none;
+  cursor:default;
+}
+.cal-day .d-num{font-size:12px;color:var(--ink);}
+.cal-day .d-amt{font-size:9px;color:var(--stamp);font-weight:700;}
+.cal-day.has-order{
+  background:var(--stamp-soft);
+  border-color:var(--stamp);
+}
+.cal-day.selected{
+  outline:2px solid var(--gold);
+}
+.cal-day.today .d-num{
+  text-decoration:underline;
+}
+.calendar-day-detail{
+  margin-top:14px;
+  border-top:1px dashed var(--line);
+  padding-top:10px;
+}
+.cal-detail-empty{
+  font-size:12px;
+  color:var(--ink-soft);
+  text-align:center;
+  padding:6px 0;
+}
+.cal-detail-date{
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.cal-detail-entry{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:8px 10px;
+  margin-bottom:6px;
   font-family:'JetBrains Mono',monospace;
   font-size:12px;
 }
-.history-detail.open{display:block;}
-.history-detail-line{
+.cal-detail-entry .cde-line{
   display:flex;
   justify-content:space-between;
-  padding:2px 0;
   color:var(--ink-soft);
+  padding:1px 0;
 }
-.history-detail-actions{
-  padding-top:6px;
-  text-align:right;
-}
-.history-delete{
-  border:none;
-  background:none;
-  color:var(--stamp);
-  font-size:11px;
-  cursor:pointer;
-  text-decoration:underline;
+.cal-detail-entry .cde-total{
+  display:flex;
+  justify-content:space-between;
+  font-weight:700;
+  color:var(--ink);
+  border-top:1px dotted var(--line);
+  margin-top:4px;
+  padding-top:4px;
 }
 .zigzag{
   height:12px;
@@ -494,10 +710,32 @@ body{
 <body>
 <div class="wrap">
   <div class="masthead">
-    <div class="stamp-circle">訂餐<br>用</div>
-    <div>
-      <h1>點餐明細系統</h1>
-      <p>輸入品項編號建立訂單，自動算出明細與總金額</p>
+    <div class="masthead-info">
+      <div class="stamp-circle">訂餐<br>用</div>
+      <div>
+        <h1>點餐明細系統</h1>
+        <p>輸入品項編號建立訂單，自動算出明細與總金額</p>
+      </div>
+    </div>
+    <button class="calendar-btn" id="calendar-btn" aria-label="查看歷史日曆">📅</button>
+  </div>
+
+  <div class="calendar-overlay" id="calendar-overlay">
+    <div class="calendar-modal">
+      <div class="calendar-header">
+        <button class="cal-nav" id="cal-prev" aria-label="上個月">‹</button>
+        <div class="calendar-title" id="cal-title"></div>
+        <button class="cal-nav" id="cal-next" aria-label="下個月">›</button>
+        <button class="cal-close" id="cal-close" aria-label="關閉日曆">✕</button>
+      </div>
+      <div class="calendar-month-total" id="cal-month-total"></div>
+      <div class="calendar-weekdays">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-day-detail" id="calendar-day-detail">
+        <div class="cal-detail-empty">點選上方日期查看當天點的菜色</div>
+      </div>
     </div>
   </div>
 
@@ -516,15 +754,35 @@ body{
   </div>
 
   <div class="layout">
-    <div id="menu-area"></div>
+    <div class="menu-column">
+      <div class="menu-search-wrap">
+        <input type="text" id="menu-search" placeholder="🔍 搜尋菜色名稱…">
+      </div>
+      <div id="menu-area"></div>
+    </div>
     <div class="receipt">
       <div class="receipt-title">訂 單 明 細</div>
       <div id="receipt-body"></div>
       <div class="receipt-actions">
-        <button class="rbtn simple" id="copy-simple-btn">僅複製品項與數量</button>
+        <button class="rbtn warn" id="clear-btn">清空訂單明細</button>
       </div>
       <div class="receipt-actions">
-        <button class="rbtn archive" id="archive-btn">存入歷史紀錄</button>
+        <button class="rbtn simple" id="copy-simple-btn">複製品項與數量</button>
+      </div>
+      <div class="receipt-actions">
+        <button class="rbtn archive" id="archive-btn">直接加入日曆</button>
+      </div>
+      <div class="receipt-actions">
+        <button class="rbtn custom-date" id="custom-date-btn">更改日期並儲存</button>
+      </div>
+      <div id="custom-date-row" style="display:none;">
+        <div class="import-field">
+          <label>選擇日期</label>
+          <div class="date-select-group" id="custom-date-select"></div>
+        </div>
+        <div class="receipt-actions">
+          <button class="rbtn archive" id="custom-date-confirm-btn">確定存入</button>
+        </div>
       </div>
       <div class="copy-toast" id="copy-toast"></div>
       <div id="copy-fallback" style="display:none; margin-top:10px;">
@@ -532,13 +790,20 @@ body{
         <textarea id="copy-fallback-text" readonly style="width:100%; box-sizing:border-box; min-height:110px; font-family:'JetBrains Mono',monospace; font-size:12px; padding:8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);"></textarea>
       </div>
     </div>
-    <div class="history-section">
-      <div class="history-header">
-        <h2>歷 史 紀 錄</h2>
-        <button class="history-clear" id="history-clear-btn">清空歷史</button>
+    <details class="import-section" id="import-section">
+      <summary>貼 上 舊 訂 單</summary>
+      <div class="import-body">
+        <div class="import-field">
+          <label for="import-text">貼上先前「複製品項與數量」的內容</label>
+          <textarea id="import-text" placeholder="例如：&#10;牛肉飯 x2&#10;牛肉湯(大) x1"></textarea>
+        </div>
+        <div class="receipt-actions">
+          <button class="rbtn simple" id="import-apply-btn">解析並加入明細</button>
+        </div>
+        <div class="import-feedback" id="import-feedback"></div>
+        <div class="import-note">套用後會覆蓋目前的訂單明細，接著可用「直接加入日曆」或「更改日期並存」保存。</div>
       </div>
-      <div id="history-body"></div>
-    </div>
+    </details>
   </div>
 </div>
 
@@ -641,10 +906,17 @@ function getQty(id, size){
   return order[keyFor(id, size)] || 0;
 }
 
+let menuSearchTerm = '';
+
 function renderMenu(){
   const area = document.getElementById('menu-area');
   area.innerHTML = '';
+  const term = menuSearchTerm.trim();
+  let anyMatch = false;
   MENU.forEach(group => {
+    const items = term ? group.items.filter(it => it.name.includes(term)) : group.items;
+    if (items.length === 0) return;
+    anyMatch = true;
     const cat = document.createElement('div');
     cat.className = 'category';
     const h2 = document.createElement('h2');
@@ -652,7 +924,7 @@ function renderMenu(){
     cat.appendChild(h2);
     const grid = document.createElement('div');
     grid.className = 'item-grid';
-    group.items.forEach(it => {
+    items.forEach(it => {
       const card = document.createElement('div');
       card.className = 'item-card';
 
@@ -718,7 +990,18 @@ function renderMenu(){
     cat.appendChild(grid);
     area.appendChild(cat);
   });
+  if (!anyMatch){
+    const empty = document.createElement('div');
+    empty.className = 'menu-empty';
+    empty.textContent = '找不到符合「' + term + '」的品項';
+    area.appendChild(empty);
+  }
 }
+
+document.getElementById('menu-search').addEventListener('input', (e) => {
+  menuSearchTerm = e.target.value;
+  renderMenu();
+});
 
 function collectOrderSummary(){
   const lines = [];
@@ -1044,13 +1327,28 @@ async function storageSetRaw(key, value){
   }
 }
 
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+let historyPrunedThisSession = false;
+
 async function loadHistory(){
   const raw = await storageGetRaw(HISTORY_KEY);
+  let list;
   try {
-    return raw ? JSON.parse(raw) : [];
+    list = raw ? JSON.parse(raw) : [];
   } catch (err) {
-    return [];
+    list = [];
   }
+
+  if (!historyPrunedThisSession){
+    historyPrunedThisSession = true;
+    const cutoff = Date.now() - ONE_YEAR_MS;
+    const kept = list.filter(e => e.ts >= cutoff);
+    if (kept.length !== list.length){
+      list = kept;
+      storageSetRaw(HISTORY_KEY, JSON.stringify(list));
+    }
+  }
+  return list;
 }
 
 async function saveHistory(list){
@@ -1062,71 +1360,193 @@ async function saveHistory(list){
   }
 }
 
-function formatDateTime(ts){
-  const d = new Date(ts);
-  const pad = n => String(n).padStart(2, '0');
-  return (d.getMonth()+1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+function refreshCalendarIfOpen(){
+  if (document.getElementById('calendar-overlay').classList.contains('open')){
+    renderCalendar();
+  }
 }
 
-async function renderHistory(){
-  const body = document.getElementById('history-body');
-  body.innerHTML = '<div class="history-empty">載入中…</div>';
-  const list = await loadHistory();
-  body.innerHTML = '';
+let clearArmed = false;
+let clearArmedTimer = null;
 
-  if (list.length === 0){
-    const empty = document.createElement('div');
-    empty.className = 'history-empty';
-    empty.textContent = '尚未有歷史訂單，整理完清單後按「存入歷史紀錄」保存。';
-    body.appendChild(empty);
+document.getElementById('clear-btn').addEventListener('click', () => {
+  const btn = document.getElementById('clear-btn');
+  if (!clearArmed){
+    clearArmed = true;
+    btn.textContent = '確定清空？再按一次';
+    clearArmedTimer = setTimeout(() => {
+      clearArmed = false;
+      btn.textContent = '清空訂單明細';
+    }, 4000);
+    return;
+  }
+  clearTimeout(clearArmedTimer);
+  clearArmed = false;
+  btn.textContent = '清空訂單明細';
+
+  Object.keys(order).forEach(k => delete order[k]);
+  renderMenu();
+  renderReceipt();
+  document.getElementById('copy-toast').textContent = '';
+  document.getElementById('copy-fallback').style.display = 'none';
+});
+
+function pad2(n){ return String(n).padStart(2, '0'); }
+
+function buildDateSelectGroup(container, initialDateStr){
+  container.innerHTML = '';
+  const now = initialDateStr ? new Date(initialDateStr + 'T12:00:00') : new Date();
+
+  const ySel = document.createElement('select');
+  ySel.id = 'cd-year';
+  const curYear = new Date().getFullYear();
+  for (let y = curYear - 1; y <= curYear + 1; y++){
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + '年';
+    if (y === now.getFullYear()) opt.selected = true;
+    ySel.appendChild(opt);
+  }
+
+  const mSel = document.createElement('select');
+  mSel.id = 'cd-month';
+  for (let m = 1; m <= 12; m++){
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m + '月';
+    if (m === now.getMonth()+1) opt.selected = true;
+    mSel.appendChild(opt);
+  }
+
+  const dSel = document.createElement('select');
+  dSel.id = 'cd-day';
+
+  function fillDays(selectedDay){
+    const y = parseInt(ySel.value, 10);
+    const m = parseInt(mSel.value, 10);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const prevVal = selectedDay || parseInt(dSel.value, 10) || now.getDate();
+    dSel.innerHTML = '';
+    for (let d = 1; d <= daysInMonth; d++){
+      const opt = document.createElement('option');
+      opt.value = d; opt.textContent = d + '日';
+      if (d === Math.min(prevVal, daysInMonth)) opt.selected = true;
+      dSel.appendChild(opt);
+    }
+  }
+  fillDays(now.getDate());
+  ySel.addEventListener('change', () => fillDays());
+  mSel.addEventListener('change', () => fillDays());
+
+  container.appendChild(ySel);
+  container.appendChild(mSel);
+  container.appendChild(dSel);
+}
+
+function readDateSelectGroup(container){
+  const y = container.querySelector('#cd-year').value;
+  const m = pad2(container.querySelector('#cd-month').value);
+  const d = pad2(container.querySelector('#cd-day').value);
+  return y + '-' + m + '-' + d;
+}
+
+const customDateRow = document.getElementById('custom-date-row');
+const customDateSelect = document.getElementById('custom-date-select');
+
+document.getElementById('custom-date-btn').addEventListener('click', () => {
+  const opening = customDateRow.style.display === 'none';
+  if (opening){
+    buildDateSelectGroup(customDateSelect);
+    customDateRow.style.display = 'block';
+  } else {
+    customDateRow.style.display = 'none';
+  }
+});
+
+document.getElementById('custom-date-confirm-btn').addEventListener('click', async () => {
+  const summary = collectOrderSummary();
+  const toast = document.getElementById('copy-toast');
+  if (summary.lines.length === 0){
+    toast.style.color = 'var(--stamp)';
+    toast.textContent = '清單是空的，先加入品項吧';
+    return;
+  }
+  const dateStr = readDateSelectGroup(customDateSelect);
+  const ts = new Date(dateStr + 'T12:00:00').getTime();
+  const list = await loadHistory();
+  list.push({ ts, lines: summary.lines, grandTotal: summary.grandTotal, totalCount: summary.totalCount });
+  await saveHistory(list);
+
+  Object.keys(order).forEach(k => delete order[k]);
+  renderMenu();
+  renderReceipt();
+  refreshCalendarIfOpen();
+  customDateRow.style.display = 'none';
+
+  toast.style.color = 'var(--green)';
+  toast.textContent = '已依指定日期加入日曆，清單已清空準備下一筆';
+  setTimeout(() => { toast.textContent = ''; }, 3000);
+});
+
+function buildMenuLookup(){
+  const map = {};
+  MENU.forEach(group => group.items.forEach(it => {
+    if (it.sizes){
+      Object.keys(it.sizes).forEach(sz => { map[it.name + '(' + sz + ')'] = { id: it.id, size: sz }; });
+    } else {
+      map[it.name] = { id: it.id, size: null };
+    }
+  }));
+  return map;
+}
+
+function parseImportText(text){
+  const map = buildMenuLookup();
+  const matched = [];
+  const unmatched = [];
+  text.split(/\r?\n/).forEach(raw => {
+    const line = raw.trim();
+    if (!line) return;
+    if (line.indexOf('總共') === 0 || line.indexOf('總金額') >= 0) return;
+    const m = line.match(/^(.+?)\s*[xX×]\s*(\d+)/);
+    if (!m){ unmatched.push(line); return; }
+    const namePart = m[1].trim().replace(/\s*\(/g, '(').replace(/\)\s*/g, ')');
+    const qty = parseInt(m[2], 10);
+    const hit = map[namePart];
+    if (hit && qty > 0){
+      matched.push({ id: hit.id, size: hit.size, qty });
+    } else {
+      unmatched.push(line);
+    }
+  });
+  return { matched, unmatched };
+}
+
+document.getElementById('import-apply-btn').addEventListener('click', () => {
+  const text = document.getElementById('import-text').value;
+  const feedback = document.getElementById('import-feedback');
+  const { matched, unmatched } = parseImportText(text);
+
+  if (matched.length === 0){
+    feedback.style.color = 'var(--stamp)';
+    feedback.textContent = '沒有辨識出任何品項，請確認格式是否為「品項 x數量」';
     return;
   }
 
-  list.slice().reverse().forEach(entry => {
-    const wrap = document.createElement('div');
-    wrap.className = 'history-entry';
-
-    const summary = document.createElement('div');
-    summary.className = 'history-summary';
-    const meta = document.createElement('div');
-    meta.className = 'history-meta';
-    meta.innerHTML = '<span class="date">' + formatDateTime(entry.ts) + '</span>共 ' + entry.totalCount + ' 份';
-    const total = document.createElement('div');
-    total.className = 'history-total';
-    total.textContent = '$' + entry.grandTotal.toLocaleString();
-    summary.appendChild(meta);
-    summary.appendChild(total);
-
-    const detail = document.createElement('div');
-    detail.className = 'history-detail';
-    entry.lines.forEach(l => {
-      const dl = document.createElement('div');
-      dl.className = 'history-detail-line';
-      dl.innerHTML = '<span>' + l.label + ' ×' + l.qty + ' @$' + l.unitPrice + '</span><span>$' + l.sub + '</span>';
-      detail.appendChild(dl);
-    });
-    const actions = document.createElement('div');
-    actions.className = 'history-detail-actions';
-    const delBtn = document.createElement('button');
-    delBtn.className = 'history-delete';
-    delBtn.textContent = '刪除這筆紀錄';
-    delBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const current = await loadHistory();
-      const updated = current.filter(x => x.ts !== entry.ts);
-      await saveHistory(updated);
-      renderHistory();
-    });
-    actions.appendChild(delBtn);
-    detail.appendChild(actions);
-
-    summary.addEventListener('click', () => detail.classList.toggle('open'));
-
-    wrap.appendChild(summary);
-    wrap.appendChild(detail);
-    body.appendChild(wrap);
+  Object.keys(order).forEach(k => delete order[k]);
+  matched.forEach(({ id, size, qty }) => {
+    const k = keyFor(id, size);
+    order[k] = (order[k] || 0) + qty;
   });
-}
+  renderMenu();
+  renderReceipt();
+
+  if (unmatched.length > 0){
+    feedback.style.color = 'var(--stamp)';
+    feedback.textContent = '已加入 ' + matched.length + ' 筆，但有 ' + unmatched.length + ' 行無法辨識：' + unmatched.join('；');
+  } else {
+    feedback.style.color = 'var(--green)';
+    feedback.textContent = '已將 ' + matched.length + ' 筆品項加入訂單明細';
+  }
+});
 
 document.getElementById('archive-btn').addEventListener('click', async () => {
   const summary = collectOrderSummary();
@@ -1143,38 +1563,157 @@ document.getElementById('archive-btn').addEventListener('click', async () => {
   Object.keys(order).forEach(k => delete order[k]);
   renderMenu();
   renderReceipt();
-  renderHistory();
+  refreshCalendarIfOpen();
 
   toast.style.color = 'var(--green)';
-  toast.textContent = '已存入歷史紀錄，清單已清空準備下一筆';
+  toast.textContent = '已加入日曆，清單已清空準備下一筆';
   setTimeout(() => { toast.textContent = ''; }, 3000);
 });
 
+let calendarViewDate = new Date();
+let calendarSelectedKey = null;
 
-let historyClearArmed = false;
-let historyClearTimer = null;
+function dateKeyFromTs(ts){
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+}
 
-document.getElementById('history-clear-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('history-clear-btn');
-  if (!historyClearArmed){
-    historyClearArmed = true;
-    btn.textContent = '確定？再按一次清空';
-    historyClearTimer = setTimeout(() => {
-      historyClearArmed = false;
-      btn.textContent = '清空歷史';
-    }, 4000);
+async function groupHistoryByDate(){
+  const list = await loadHistory();
+  const map = {};
+  list.forEach(entry => {
+    const key = dateKeyFromTs(entry.ts);
+    (map[key] = map[key] || []).push(entry);
+  });
+  return map;
+}
+
+async function renderCalendar(){
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+  document.getElementById('cal-title').textContent = year + ' 年 ' + (month+1) + ' 月';
+
+  const byDate = await groupHistoryByDate();
+
+  let monthTotal = 0;
+  Object.keys(byDate).forEach(key => {
+    const [y, m] = key.split('-').map(Number);
+    if (y === year && m === month+1){
+      byDate[key].forEach(e => { monthTotal += e.grandTotal; });
+    }
+  });
+  document.getElementById('cal-month-total').innerHTML = '本月總金額：<b>$' + monthTotal.toLocaleString() + '</b>';
+
+  const grid = document.getElementById('calendar-grid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(year, month, 1);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayKey = dateKeyFromTs(Date.now());
+
+  for (let i = 0; i < startWeekday; i++){
+    const blank = document.createElement('div');
+    blank.className = 'cal-day empty';
+    grid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++){
+    const key = year + '-' + pad2(month+1) + '-' + pad2(day);
+    const entries = byDate[key];
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' + (entries ? ' has-order' : '') + (key === todayKey ? ' today' : '') + (key === calendarSelectedKey ? ' selected' : '');
+    const num = document.createElement('div');
+    num.className = 'd-num';
+    num.textContent = day;
+    cell.appendChild(num);
+    if (entries){
+      const dayTotal = entries.reduce((n, e) => n + e.grandTotal, 0);
+      const amt = document.createElement('div');
+      amt.className = 'd-amt';
+      amt.textContent = '$' + dayTotal;
+      cell.appendChild(amt);
+      cell.addEventListener('click', () => {
+        calendarSelectedKey = key;
+        renderCalendar();
+        renderCalendarDetail(key, entries);
+      });
+    }
+    grid.appendChild(cell);
+  }
+
+  if (calendarSelectedKey){
+    const [sy, sm] = calendarSelectedKey.split('-').map(Number);
+    if (sy === year && sm === month+1 && byDate[calendarSelectedKey]){
+      renderCalendarDetail(calendarSelectedKey, byDate[calendarSelectedKey]);
+    } else {
+      calendarSelectedKey = null;
+      renderCalendarDetail(null, null);
+    }
+  }
+}
+
+function renderCalendarDetail(key, entries){
+  const box = document.getElementById('calendar-day-detail');
+  box.innerHTML = '';
+  if (!key || !entries || entries.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'cal-detail-empty';
+    empty.textContent = '點選上方日期查看當天點的菜色';
+    box.appendChild(empty);
     return;
   }
-  clearTimeout(historyClearTimer);
-  historyClearArmed = false;
-  btn.textContent = '清空歷史';
-  await saveHistory([]);
-  renderHistory();
+  const [y, m, d] = key.split('-').map(Number);
+  const title = document.createElement('div');
+  title.className = 'cal-detail-date';
+  const dayTotal = entries.reduce((n, e) => n + e.grandTotal, 0);
+  title.textContent = y + '/' + m + '/' + d + ' 共 $' + dayTotal.toLocaleString();
+  box.appendChild(title);
+
+  entries.forEach(entry => {
+    const card = document.createElement('div');
+    card.className = 'cal-detail-entry';
+    entry.lines.forEach(l => {
+      const line = document.createElement('div');
+      line.className = 'cde-line';
+      line.innerHTML = '<span>' + l.label + ' ×' + l.qty + '</span><span>$' + l.sub + '</span>';
+      card.appendChild(line);
+    });
+    const total = document.createElement('div');
+    total.className = 'cde-total';
+    total.innerHTML = '<span>小計 ' + entry.totalCount + ' 份</span><span>$' + entry.grandTotal + '</span>';
+    card.appendChild(total);
+    box.appendChild(card);
+  });
+}
+
+function openCalendar(){
+  calendarViewDate = new Date();
+  calendarSelectedKey = null;
+  document.getElementById('calendar-overlay').classList.add('open');
+  renderCalendar();
+}
+
+function closeCalendar(){
+  document.getElementById('calendar-overlay').classList.remove('open');
+}
+
+document.getElementById('calendar-btn').addEventListener('click', openCalendar);
+document.getElementById('cal-close').addEventListener('click', closeCalendar);
+document.getElementById('calendar-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'calendar-overlay') closeCalendar();
+});
+document.getElementById('cal-prev').addEventListener('click', () => {
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth()-1, 1);
+  renderCalendar();
+});
+document.getElementById('cal-next').addEventListener('click', () => {
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth()+1, 1);
+  renderCalendar();
 });
 
 renderMenu();
 renderReceipt();
-renderHistory();
 </script>
 </body>
 </html>
