@@ -28,3 +28,7 @@ node_modules/
 # 暫存
 .commit-message.txt
 *.bundle
+
+# Firebase 部署暫存
+.firebase/
+firebase-debug.log
