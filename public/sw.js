@@ -1,5 +1,5 @@
 // 版本號由 deploy.bat 自動更新，請勿手動修改
-const APP_VERSION = 'dev';
+const APP_VERSION = '2026.10.04-1510';
 // 只管理以這個前綴開頭的快取，絕不碰使用者資料（IndexedDB / localStorage）
 const CACHE_PREFIX = 'food-order-shell-';
 const CACHE_NAME = CACHE_PREFIX + APP_VERSION;
